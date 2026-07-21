@@ -1,0 +1,408 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String     @id @default(cuid())
+  email              String     @unique
+  name               String?
+  image              String?
+  stripeCustomerId   String?
+  planId             String         @default("free")
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  googleRefreshToken String?
+  apiKey             String?        @unique
+  campaigns          Campaign[]
+  leads              Lead[]
+  mapLeads           MapLead[]
+  linkedinLeads      LinkedinLead[]
+  sites              Site[]
+
+  // Phase 6
+  aiUsageCount Int      @default(0)
+  agencyName   String?
+  customDomain String?
+}
+
+model Site {
+  id                      String                   @id @default(uuid())
+  userId                  String
+  url                     String
+  sitemap_url             String?
+  last_crawled            DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  ga4PropertyId           String?
+  gscPropertyId           String?
+  alerts                  Alert[]
+  backlinks               Backlink[]
+  blogs                   Blog[]
+  clarityMetrics          ClarityMetric[]
+  competitors             Competitor[]
+  gmbProfiles             GMBProfile[]
+  internalLinkSuggestions InternalLinkSuggestion[]
+  keywords                Keyword[]
+  pages                   Page[]
+  autoSeoReports          AutoSeoReport[]
+  anomalies               AiAnomaly[]
+  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  visitors                Visitor[]
+
+  @@index([userId])
+}
+
+model Page {
+  id              String    @id @default(uuid())
+  siteId          String
+  url             String
+  indexed         Boolean   @default(false)
+  indexingStatus  String    @default("UNKNOWN")
+  lastSubmittedAt DateTime?
+  lighthouse_data String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  last_audited    DateTime?
+  psi_data        String?
+  site            Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([url])
+}
+
+model Keyword {
+  id        String   @id @default(uuid())
+  siteId    String
+  keyword   String
+  volume    Int?
+  position  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+model Visitor {
+  id        String   @id @default(uuid())
+  siteId    String
+  ip        String?
+  city      String?
+  country   String?
+  source    String?
+  createdAt DateTime @default(now())
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+model Blog {
+  id               String   @id @default(uuid())
+  siteId           String
+  title            String
+  content          String
+  posted_platforms String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  site             Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+model Lead {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  url       String?
+  email     String?
+  phone     String?
+  city      String?
+  score     Int?     @default(0)
+  status    String   @default("New")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Campaign {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  subject   String?
+  sent      Int      @default(0)
+  opened    Int      @default(0)
+  replied   Int      @default(0)
+  converted Int      @default(0)
+  status    String   @default("Active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ClarityMetric {
+  id             String   @id @default(uuid())
+  siteId         String
+  date           DateTime
+  url            String?
+  device         String?
+  sessions       Int      @default(0)
+  rageClicks     Int      @default(0)
+  deadClicks     Int      @default(0)
+  quickbacks     Int      @default(0)
+  engagementTime Float    @default(0)
+  createdAt      DateTime @default(now())
+  site           Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, date, url, device])
+}
+
+model Competitor {
+  id         String              @id @default(uuid())
+  siteId     String
+  url        String
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  site       Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  keywords   CompetitorKeyword[]
+  aiStrategy String?
+  contentGap String?
+}
+
+model CompetitorKeyword {
+  id           String     @id @default(uuid())
+  competitorId String
+  keyword      String
+  position     Int?
+  volume       Int?
+  traffic      Int?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  competitor   Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+}
+
+model InternalLinkSuggestion {
+  id                  String   @id @default(uuid())
+  siteId              String
+  sourcePageUrl       String
+  targetPageUrl       String
+  suggestedAnchorText String
+  status              String   @default("Pending")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  site                Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+}
+
+model GMBProfile {
+  id            String      @id @default(uuid())
+  siteId        String
+  businessName  String
+  rating        Float?
+  totalReviews  Int?
+  address       String?
+  phone         String?
+  totalSearches Int?        @default(0)
+  mapViews      Int?        @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  site          Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  reviews       GMBReview[]
+}
+
+model GMBReview {
+  id           String     @id @default(uuid())
+  gmbProfileId String
+  reviewerName String
+  rating       Int
+  comment      String?
+  reply        String?
+  isReplied    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  gmbProfile   GMBProfile @relation(fields: [gmbProfileId], references: [id], onDelete: Cascade)
+}
+
+model Backlink {
+  id            String   @id @default(uuid())
+  siteId        String
+  domain        String
+  url           String
+  targetUrl     String
+  toxicityScore Int      @default(0)
+  isDisavowed   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  site          Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+}
+
+model Alert {
+  id          String   @id @default(uuid())
+  siteId      String
+  type        String
+  title       String
+  description String
+  source      String
+  isRead      Boolean  @default(false)
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+}
+
+model AiAnomaly {
+  id          String     @id @default(uuid())
+  siteId      String
+  type        String // e.g., "TRAFFIC_DROP", "KEYWORD_DROP"
+  description String
+  severity    String // "High", "Medium", "Low"
+  status      String     @default("DETECTED") // DETECTED, RESOLVED, IGNORED
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  site        Site       @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  actions     AiAction[]
+}
+
+model AiAction {
+  id         String    @id @default(uuid())
+  anomalyId  String
+  task       String
+  impact     String
+  isExecuted Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  anomaly    AiAnomaly @relation(fields: [anomalyId], references: [id], onDelete: Cascade)
+}
+
+model AutoSeoReport {
+  id               String   @id @default(uuid())
+  siteId           String
+  url              String
+  status           String   @default("Pending") // Pending, InProgress, Completed, Failed
+  gaData           String? // JSON
+  gaReport         String? // AI Report
+  gscData          String? // JSON
+  gscReport        String? // AI Report
+  robotsData       String? // JSON
+  robotsReport     String? // AI Report
+  keywordData      String? // JSON
+  keywordReport    String? // AI Report
+  lighthouseData   String? // JSON
+  lighthouseReport String? // AI Report
+  overallSummary   String? // AI Report
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  site             Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+}
+
+model MapLead {
+  id                       String        @id @default(uuid())
+  userId                   String
+  name                     String
+  phone                    String?       @default("N/A")
+  additionalPhones         String? // JSON serialized string or comma separated
+  emails                   String? // JSON serialized string or comma separated
+  address                  String?
+  website                  String?       @default("N/A")
+  linkedin                 String?       @default("N/A")
+  category                 String?
+  business_type            String?       @default("General")
+  city                     String?
+  location_name            String?
+  rating                   Float?        @default(0)
+  reviews                  Int?          @default(0)
+  match_score              Int?          @default(0)
+  placeId                  String
+  location_lat             Float?
+  location_lng             Float?
+  search_query             String?
+  status                   String?       @default("online")
+  isWhatsAppNumber         Boolean?
+  whatsappProcessingStatus String? // e.g. PENDING, COMPLETED, FAILED
+  whatsappCheckedAt        DateTime?
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+  user                     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkedinLead             LinkedinLead?
+
+  @@unique([userId, placeId])
+  @@index([userId])
+}
+
+model LinkedinLead {
+  id             String   @id @default(uuid())
+  userId         String
+  mapLeadId      String   @unique
+  companyName    String
+  linkedinUrl    String?
+  industry       String?
+  employeeCount  Int?
+  website        String?
+  description    String?
+  followers      Int?
+  companySize    String?
+  headquarters   String?
+  logoUrl        String?
+  status         String   // pending, searching_url, scraping_company, scraping_employees, completed, failed
+  
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mapLead        MapLead  @relation(fields: [mapLeadId], references: [id], onDelete: Cascade)
+  employees      LinkedinEmployee[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model LinkedinEmployee {
+  id             String   @id @default(uuid())
+  linkedinLeadId String
+  name           String
+  title          String?
+  location       String?
+  city           String?
+  state          String?
+  country        String?
+  description    String?
+  email          String?
+  personalEmail  String?
+  phone          String?
+  mobilePhone    String?
+  pictureUrl     String?
+  profileUrl     String?
+  premium        Boolean  @default(false)
+
+  linkedinLead   LinkedinLead @relation(fields: [linkedinLeadId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+model WhatsappValidationJob {
+  id               String   @id @default(uuid())
+  accountId        String
+  status           String   @default("PENDING")
+  originalFileName String
+  sourceFileUrl    String
+  resultFileUrl    String?
+  totalRows        Int      @default(0)
+  processedRows    Int      @default(0)
+  error            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model FirecrawlLog {
+  id           String   @id @default(cuid())
+  userId       String
+  websiteUrl   String
+  websiteHash  String
+  firecrawlUrl String?
+  source       String   @default("FIRECRAWL_API") // e.g. "CUSTOM_SCRAPER" or "FIRECRAWL_API"
+  status       String   @default("success") // "success" or "failed"
+  errorMessage String?
+  response     String?  // We will store the JSON response as a stringified payload for SQLite
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
