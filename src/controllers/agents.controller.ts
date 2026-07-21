@@ -5,12 +5,13 @@ import { SecureHardwarePurgeEngine } from '../services/securePurge';
 
 export const runAgentW1 = async (req: Request, res: Response) => {
   const { location = 'Mumbai', industry = 'Cafe' } = req.body;
-  
+
   try {
     const agentW1 = new AutonomousLocalBusinessCloser();
     agentW1.executePipeline(location, industry).catch(console.error);
 
-    res.json({ 
+
+    res.json({
       message: 'Agent W1 Pipeline Started successfully.',
       status: 'Processing in background',
       target: { location, industry }
@@ -28,7 +29,7 @@ export const runAgentW2 = async (req: Request, res: Response) => {
     const agentW2 = new AiTrendJacker();
     agentW2.executePipeline(siteId).catch(console.error);
 
-    res.json({ 
+    res.json({
       message: 'Agent W2 Pipeline Started successfully.',
       status: 'Scanning trends and generating multimodal content...'
     });
@@ -43,7 +44,7 @@ export const runAgentW3 = async (req: Request, res: Response) => {
 
   try {
     const agentW3 = new SecureHardwarePurgeEngine();
-    const result = await agentW3.executePurge(userId); 
+    const result = await agentW3.executePurge(userId);
 
     res.json(result);
   } catch (error) {
