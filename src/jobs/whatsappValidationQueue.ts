@@ -50,7 +50,8 @@ const parseFile = (buffer: Buffer, fileName: string) => {
   const workbook = XLSX.read(buffer, { type: "buffer", raw: false });
   const sheetName = workbook.SheetNames[0];
   if (!sheetName) throw new Error("No sheet found");
-  return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "", raw: false }).map(normalizeRow);
+  const worksheet = workbook.Sheets[sheetName] as any;
+  return XLSX.utils.sheet_to_json(worksheet, { defval: "", raw: false }).map(normalizeRow);
 };
 
 export const whatsappValidationWorker = new Worker(
