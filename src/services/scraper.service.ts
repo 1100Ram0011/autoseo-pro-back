@@ -2,7 +2,7 @@ import axios from "axios";
 import puppeteer from "puppeteer";
 import { URL } from "url";
 // Cache the Turndown script so we don't have to fetch it repeatedly
-let cachedTurndownScript = null;
+let cachedTurndownScript: any = null;
 const getTurndownScript = async () => {
   if (cachedTurndownScript) return cachedTurndownScript;
   try {
@@ -21,7 +21,7 @@ const getTurndownScript = async () => {
  * Helper to quickly verify if a URL is reachable, and automatically resolve WWW fallbacks
  * before wasting time in the headless browser.
  */
-const resolveValidUrl = async (targetUrl) => {
+const resolveValidUrl = async (targetUrl: string) => {
   try {
     // Quick ping to check if DNS resolves
     await axios.get(targetUrl, {
@@ -29,7 +29,7 @@ const resolveValidUrl = async (targetUrl) => {
       headers: { "User-Agent": "Mozilla/5.0" },
     });
     return targetUrl;
-  } catch (err) {
+  } catch (err: any) {
     // If DNS completely fails or connection times out, try www.
     if (
       err.code === "ENOTFOUND" ||
@@ -101,6 +101,7 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
 
     browser = await puppeteer.launch({
       headless: true,
+      // @ts-ignore
       ignoreHTTPSErrors: true,
       args: puppeteerArgs,
     });
@@ -128,7 +129,7 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
 
       // Block programmatic navigation fallback used by disable-devtool to redirect to blank pages
       window.addEventListener("beforeunload", (e) => {
-        if (window.__ALLOW_NAVIGATION__) return;
+        if ((window as any).__ALLOW_NAVIGATION__) return;
         e.preventDefault();
         e.returnValue = "";
       });
@@ -137,7 +138,7 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
       const originalWrite = document.write;
       document.write = function (content) {
         if (!content || content.trim() === "") return;
-        return originalWrite.apply(this, arguments);
+        return originalWrite.apply(this, arguments as any);
       };
     });
     const turndownSrc = await getTurndownScript();
@@ -154,11 +155,11 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
         console.log(`[SCRAPER] Navigating to: ${urlToVisit}`);
         await page
           .evaluateOnNewDocument(() => {
-            window.__ALLOW_NAVIGATION__ = true;
+            (window as any).__ALLOW_NAVIGATION__ = true;
             
             // Bypass Disable-Devtool securely without triggering Cloudflare Native Hook detection
             const originalSetInterval = window.setInterval;
-            const newSetInterval = function (callback, time) {
+            const newSetInterval: any = function (callback: any, time: any) {
               if (time && time < 1000) return 0;
               return originalSetInterval(callback, time);
             };
@@ -177,7 +178,7 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
             waitUntil: "networkidle2",
             timeout: 60000,
           });
-        } catch (gotoErr) {
+        } catch (gotoErr: any) {
           if (
             gotoErr.message.includes("net::ERR_ABORTED") ||
             gotoErr.message.includes("net::ERR_CONNECTION_REFUSED") ||
@@ -268,25 +269,25 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
               const metadata = {
                 title: document.title || "",
                 description:
-                  document.querySelector('meta[name="description"]')?.content ||
+                  (document.querySelector('meta[name="description"]') as any)?.content ||
                   "",
                 ogImage:
-                  document.querySelector('meta[property="og:image"]')
+                  (document.querySelector('meta[property="og:image"]') as any)
                     ?.content || "",
                 ogTitle:
-                  document.querySelector('meta[property="og:title"]')
+                  (document.querySelector('meta[property="og:title"]') as any)
                     ?.content || "",
                 keywords:
-                  document.querySelector('meta[name="keywords"]')?.content ||
+                  (document.querySelector('meta[name="keywords"]') as any)?.content ||
                   "",
                 sourceURL: currentUrl,
               };
               const favicon =
-                document.querySelector('link[rel="icon"]')?.href ||
-                document.querySelector('link[rel="shortcut icon"]')?.href ||
+                (document.querySelector('link[rel="icon"]') as any)?.href ||
+                (document.querySelector('link[rel="shortcut icon"]') as any)?.href ||
                 "";
 
-              const resolveUrl = (urlStr) => {
+              const resolveUrl = (urlStr: string) => {
                 try {
                   return new URL(urlStr, currentUrl).href;
                 } catch (e) {
@@ -390,7 +391,7 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
               const h1 = document.querySelector("h1");
               const computedH1 = h1 ? window.getComputedStyle(h1) : computedBody;
 
-              const rgbToHex = (rgb) => {
+              const rgbToHex = (rgb: any) => {
                 if (!rgb || typeof rgb !== "string") return "#000000";
                 const match = rgb.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
                 if (!match) return rgb;
@@ -449,7 +450,7 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
                       if (
                         src &&
                         src.startsWith("http") &&
-                        !images.some((i) => i.src === src)
+                        !images.some((i: any) => i && i.src === src)
                       ) {
                         images.push({ src, alt: "Background Image" });
                       }
@@ -493,10 +494,10 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
                 .forEach((el) => el.remove());
 
               let markdown = "";
-              if (hasTurndown && typeof window.TurndownService !== "undefined") {
+              if (hasTurndown && typeof (window as any).TurndownService !== "undefined") {
                 try {
                   // @ts-ignore
-                  const turndownService = new window.TurndownService({
+                  const turndownService = new (window as any).TurndownService({
                     headingStyle: "atx",
                     codeBlockStyle: "fenced",
                   });
@@ -511,7 +512,7 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
               }
 
               return { markdown, links, images, iframes, metadata, branding };
-            } catch (evalErr) {
+            } catch (evalErr: any) {
               console.error("DOM Evaluation error:", evalErr);
               return {
                 error: "DOM_EVALUATION_ERROR",
@@ -542,7 +543,7 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
         }
 
         return evaluatedData;
-      } catch (e) {
+      } catch (e: any) {
         console.error(`[SCRAPER] Failed to scrape ${urlToVisit}:`, e.message);
         return { error: "UNKNOWN_PUPPETEER_ERROR", message: e.message };
       }
@@ -637,7 +638,7 @@ export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
 
     // Deduplicate array data
     firecrawlLikeData.images = firecrawlLikeData.images.filter(
-      (img, index, self) => index === self.findIndex((t) => t.src === img.src),
+      (img: any, index: number, self: any[]) => index === self.findIndex((t: any) => t.src === img.src),
     );
     firecrawlLikeData.iframes = [...new Set(firecrawlLikeData.iframes)];
     firecrawlLikeData.links = uniqueLinks;
