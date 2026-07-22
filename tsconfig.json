@@ -8,6 +8,7 @@
     // Environment Settings
     "module": "CommonJS",
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "target": "esnext",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
