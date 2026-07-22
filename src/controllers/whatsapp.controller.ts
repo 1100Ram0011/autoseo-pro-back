@@ -125,8 +125,9 @@ export const uploadValidationFile = async (req: Request, res: Response): Promise
 
 export const getValidationStatus = async (req: Request, res: Response): Promise<any> => {
   try {
+    const jobId = req.params.jobId as string;
     const job = await prisma.whatsappValidationJob.findUnique({
-      where: { id: req.params.jobId }
+      where: { id: jobId }
     });
     if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
 
