@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import axios from 'axios';
 
 // Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: (process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || "") });
 
 const buildPrompt = (targetMarket: string, geographicFocus: string, limit: number) => `
 You are a B2B lead database. Generate ${limit} highly realistic and actual Indian business leads from your existing knowledge base.
@@ -44,7 +44,7 @@ const askGemini = async (prompt: string): Promise<string> => {
     model: "gemini-2.5-flash",
     contents: prompt
   });
-  const raw = result.text.trim();
+  const raw = ((result as any).text || "").trim();
   return raw.replace(/```json/gi, "").replace(/```/g, "").trim();
 };
 
