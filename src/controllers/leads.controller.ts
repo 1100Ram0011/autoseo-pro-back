@@ -93,8 +93,8 @@ export const getMapLeads = async (req: Request, res: Response): Promise<any> => 
 
 export const deleteMapLead = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { id } = req.params;
-        const userId = (req as any).user?.id || req.query.userId || "1";
+        const id = req.params.id as string;
+        const userId = ((req as any).user?.id as string) || (req.query.userId as string) || "1";
 
         const deletedLead = await prisma.mapLead.deleteMany({ where: { id, userId } });
         if (deletedLead.count === 0) {
@@ -125,7 +125,7 @@ export const getMapLeadProgress = async (req: Request, res: Response): Promise<a
 
 export const verifyMapLeadWhatsApp = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { id } = req.params;
+        const id = req.params.id as string;
         const lead = await prisma.mapLead.findUnique({ where: { id } });
         if (lead) {
             await prisma.mapLead.update({
@@ -179,8 +179,8 @@ export const validateTargetMarket = async (req: Request, res: Response): Promise
 
 export const getLinkedinLead = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { mapLeadId } = req.params;
-        const userId = (req as any).user?.id || req.query.userId || "1";
+        const mapLeadId = req.params.mapLeadId as string;
+        const userId = ((req as any).user?.id as string) || (req.query.userId as string) || "1";
 
         const linkedinLead = await prisma.linkedinLead.findUnique({
             where: { mapLeadId },
