@@ -152,7 +152,7 @@ export const linkedinWorker = new Worker<LinkedinJobData>(
                 website: companyData.website || companyData.callToActionUrl,
                 description: companyData.description,
                 followers: companyData.followerCount,
-                companySize: companyData.employeeCountRange ? `${companyData.employeeCountRange.start}+` : undefined,
+                companySize: companyData.employeeCountRange ? `${companyData.employeeCountRange.start}+` : null,
                 headquarters: companyData.locations?.find((loc: any) => loc.headquarter)?.parsed?.city || companyData.locations?.[0]?.parsed?.city,
                 logoUrl: companyData.logo || companyData.logos?.[0]?.url,
                 status: 'scraping_employees'
