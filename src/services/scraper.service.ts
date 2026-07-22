@@ -64,7 +64,7 @@ const resolveValidUrl = async (targetUrl) => {
  * @returns {Promise<Object>} An object containing markdown text, images, iframes, metadata, links, and branding details
  * @throws {Error} If the scraper fails to extract any valid content or crashes
  */
-export const scrapeWebsite = async (formattedUrl) => {
+export const scrapeWebsite = async (formattedUrl: string): Promise<any> => {
   // Pre-flight check to resolve WWW and verify existence
   const resolvedUrl = await resolveValidUrl(formattedUrl);
   if (resolvedUrl !== formattedUrl) {
@@ -73,7 +73,7 @@ export const scrapeWebsite = async (formattedUrl) => {
   }
 
   let browser = null;
-  let firecrawlLikeData = {
+  let firecrawlLikeData: any = {
     url: formattedUrl,
     markdown: "",
     metadata: {},
@@ -149,7 +149,7 @@ export const scrapeWebsite = async (formattedUrl) => {
      * @param {string} urlToVisit - The specific page URL to navigate to
      * @returns {Promise<Object|null>} The extracted page data or null if a fatal network error occurred
      */
-    const extractPageData = async (urlToVisit) => {
+    const extractPageData = async (urlToVisit: string): Promise<any> => {
       try {
         console.log(`[SCRAPER] Navigating to: ${urlToVisit}`);
         await page
@@ -559,7 +559,7 @@ export const scrapeWebsite = async (formattedUrl) => {
       throw new Error(`[${homeData.error}] Failed to extract content from ${formattedUrl}. Reason: ${homeData.message || "Unknown error"}`);
     }
 
-    let uniqueLinks = [];
+    let uniqueLinks: any[] = [];
     if (homeData && !homeData.error) {
       firecrawlLikeData.markdown += `\n\n--- PAGE: ${formattedUrl} ---\n\n${homeData.markdown}`;
       firecrawlLikeData.metadata = homeData.metadata;
