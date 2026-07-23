@@ -1,5 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import routes from './routes';
 import { initClarityCron } from './services/claritySync';
@@ -13,6 +15,10 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 4000;
+
+// --- Security & Performance Middleware ---
+app.use(helmet());
+app.use(compression());
 
 // --- CORS: Only allow known origins ---
 const allowedOrigins = [

@@ -7,26 +7,34 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
 });
 
 export const createCheckout = async (req: Request, res: Response) => {
-  const { userId, priceId } = req.body;
-  if (!userId) return res.status(400).json({ error: 'User ID is required' });
-
   try {
+    const { priceId } = req.body;
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+    // In a real app, you'd look up the customer in Stripe or create one
+    // Here we're just simulating for the demo
     if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_mock') {
-      // Mock flow if no real stripe key
-      return res.json({ url: 'http://localhost:3000/dashboard/billing?success=true' });
+      // Simulate success if no Stripe key is present
+      return res.json({ url: `${frontendUrl}/dashboard/billing?success=true` });
     }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price: priceId || process.env.STRIPE_PRICE_PRO, // Should match Pro or Agency price ID
+          price: priceId,
           quantity: 1,
         },
       ],
       mode: 'subscription',
-      success_url: `http://localhost:3000/dashboard/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://localhost:3000/dashboard/billing?canceled=true`,
+      success_url: `${frontendUrl}/dashboard/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${frontendUrl}/dashboard/billing?canceled=true`,
       client_reference_id: userId,
     });
 

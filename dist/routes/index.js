@@ -1,0 +1,64 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const auth_routes_1 = __importDefault(require("./auth.routes"));
+const sites_routes_1 = __importDefault(require("./sites.routes"));
+const keywords_routes_1 = __importDefault(require("./keywords.routes"));
+const gsc_routes_1 = __importDefault(require("./gsc.routes"));
+const analytics_routes_1 = __importDefault(require("./analytics.routes"));
+const seo_routes_1 = __importDefault(require("./seo.routes"));
+const ai_routes_1 = __importDefault(require("./ai.routes"));
+const agents_routes_1 = __importDefault(require("./agents.routes"));
+const billing_routes_1 = __importDefault(require("./billing.routes"));
+const leads_routes_1 = __importDefault(require("./leads.routes"));
+const campaigns_routes_1 = __importDefault(require("./campaigns.routes"));
+const clarity_routes_1 = __importDefault(require("./clarity.routes"));
+const business_routes_1 = __importDefault(require("./business.routes"));
+const autopilot_routes_1 = __importDefault(require("./autopilot.routes"));
+const competitors_routes_1 = __importDefault(require("./competitors.routes"));
+const links_routes_1 = __importDefault(require("./links.routes"));
+const gmb_routes_1 = __importDefault(require("./gmb.routes"));
+const backlinks_routes_1 = __importDefault(require("./backlinks.routes"));
+const alerts_routes_1 = __importDefault(require("./alerts.routes"));
+const autoseo_routes_1 = __importDefault(require("./autoseo.routes"));
+const anomaly_routes_1 = __importDefault(require("./anomaly.routes"));
+const whatsapp_routes_1 = __importDefault(require("./whatsapp.routes"));
+const router = (0, express_1.Router)();
+const users_routes_1 = __importDefault(require("./users.routes"));
+const public_api_routes_1 = __importDefault(require("./public-api.routes"));
+// --- Public Routes (no auth required) ---
+router.use('/auth', auth_routes_1.default);
+router.use('/v1', public_api_routes_1.default);
+// --- Apply auth middleware to all subsequent routes ---
+router.use(auth_middleware_1.authMiddleware);
+// --- Protected Routes ---
+router.use('/users', users_routes_1.default);
+router.use('/sites', sites_routes_1.default);
+router.use('/sites/:id/competitors', competitors_routes_1.default);
+router.use('/sites/:id/internal-links', links_routes_1.default);
+router.use('/sites/:id/gmb', gmb_routes_1.default);
+router.use('/sites/:id/backlinks', backlinks_routes_1.default);
+router.use('/sites/:id/alerts', alerts_routes_1.default);
+router.use('/', keywords_routes_1.default);
+router.use('/leads', leads_routes_1.default);
+router.use('/campaigns', campaigns_routes_1.default);
+router.use('/clarity', clarity_routes_1.default);
+router.use('/anomalies', anomaly_routes_1.default);
+router.use('/business', business_routes_1.default);
+router.use('/', gsc_routes_1.default);
+router.use('/', analytics_routes_1.default);
+router.use('/', seo_routes_1.default);
+router.use('/ai', ai_routes_1.default);
+router.use('/agents', agents_routes_1.default);
+router.use('/', billing_routes_1.default);
+router.use('/autopilot', autopilot_routes_1.default);
+router.use('/', autoseo_routes_1.default);
+const scraper_routes_1 = __importDefault(require("./scraper.routes"));
+router.use('/whatsapp', whatsapp_routes_1.default);
+router.use('/scraper', scraper_routes_1.default);
+exports.default = router;
+//# sourceMappingURL=index.js.map

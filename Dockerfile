@@ -1,14 +1,11 @@
-# Use the official Node.js image as the base
-FROM node:20-alpine
+# --- Build Stage ---
+FROM node:20-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if available)
+# Copy package files
 COPY package*.json ./
-
-# Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy Prisma schema and generate client
 COPY prisma ./prisma/
@@ -20,8 +17,28 @@ COPY . .
 # Build TypeScript code
 RUN npm run build
 
-# Expose the backend port
+# --- Production Stage ---
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 appuser
+
+# Copy built application
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/prisma ./prisma
+
+# Only install production dependencies
+RUN npm ci --omit=dev && npx prisma generate
+
+USER appuser
+
 EXPOSE 4000
 
-# Start the server using the compiled JS
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]
