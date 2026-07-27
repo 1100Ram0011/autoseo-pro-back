@@ -37,9 +37,10 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
     
     // Save refresh token to user in database
     if (tokens && tokens.refresh_token && email) {
-      await prisma.user.update({
+      await prisma.user.upsert({
         where: { email: email as string },
-        data: { googleRefreshToken: tokens.refresh_token }
+        update: { googleRefreshToken: tokens.refresh_token },
+        create: { email: email as string, googleRefreshToken: tokens.refresh_token }
       });
     }
 
