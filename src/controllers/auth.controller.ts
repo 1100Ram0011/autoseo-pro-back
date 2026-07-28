@@ -77,7 +77,7 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
              }
 
              if (allGa4Properties.length === 1) {
-               ga4ToSave = allGa4Properties[0].id; // Only one property, just use it
+               ga4ToSave = allGa4Properties[0]!.id; // Only one property, just use it
              } else if (allGa4Properties.length > 1) {
                // Try to find exact match
                const match = allGa4Properties.find(p => p.name.toLowerCase().includes(normalizedSiteUrl) || normalizedSiteUrl.includes(p.name.toLowerCase()));
@@ -93,8 +93,8 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
              const gscRes = await webmasters.sites.list();
              const allGscProperties = gscRes.data.siteEntry || [];
 
-             if (allGscProperties.length === 1 && allGscProperties[0].siteUrl) {
-               gscToSave = allGscProperties[0].siteUrl; // Only one property
+             if (allGscProperties.length === 1 && allGscProperties[0]?.siteUrl) {
+               gscToSave = allGscProperties[0]!.siteUrl; // Only one property
              } else if (allGscProperties.length > 1) {
                // Exact match
                const match = allGscProperties.find(p => {
