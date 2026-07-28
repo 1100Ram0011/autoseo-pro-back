@@ -9,8 +9,12 @@ export const getOverview = async (req: Request, res: Response) => {
     if (!site) return res.status(404).json({ error: 'Site not found' });
     const data = await getGscOverview(site.gscPropertyId || site.url, site.userId);
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch GSC overview' });
+  } catch (error: any) {
+    if (error.message && (error.message.includes('403') || error.message.includes('permission'))) {
+      res.status(400).json({ error: 'No GSC Property ID linked. Please select a property.' });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch GSC overview' });
+    }
   }
 };
 
@@ -20,8 +24,12 @@ export const getKeywords = async (req: Request, res: Response) => {
     if (!site) return res.status(404).json({ error: 'Site not found' });
     const data = await getGscKeywords(site.gscPropertyId || site.url, site.userId, site.id);
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch GSC keywords' });
+  } catch (error: any) {
+    if (error.message && (error.message.includes('403') || error.message.includes('permission'))) {
+      res.status(400).json({ error: 'No GSC Property ID linked. Please select a property.' });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch GSC keywords' });
+    }
   }
 };
 
@@ -31,8 +39,12 @@ export const getPages = async (req: Request, res: Response) => {
     if (!site) return res.status(404).json({ error: 'Site not found' });
     const data = await getGscPages(site.gscPropertyId || site.url, site.userId, site.id);
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch GSC pages' });
+  } catch (error: any) {
+    if (error.message && (error.message.includes('403') || error.message.includes('permission'))) {
+      res.status(400).json({ error: 'No GSC Property ID linked. Please select a property.' });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch GSC pages' });
+    }
   }
 };
 
@@ -42,8 +54,12 @@ export const getCoverage = async (req: Request, res: Response) => {
     if (!site) return res.status(404).json({ error: 'Site not found' });
     const data = await getGscCoverage(site.gscPropertyId || site.url, site.userId);
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch GSC coverage' });
+  } catch (error: any) {
+    if (error.message && (error.message.includes('403') || error.message.includes('permission'))) {
+      res.status(400).json({ error: 'No GSC Property ID linked. Please select a property.' });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch GSC coverage' });
+    }
   }
 };
 
@@ -53,8 +69,12 @@ export const getCountries = async (req: Request, res: Response) => {
     if (!site) return res.status(404).json({ error: 'Site not found' });
     const data = await getGscCountries(site.gscPropertyId || site.url, site.userId);
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch GSC countries' });
+  } catch (error: any) {
+    if (error.message && (error.message.includes('403') || error.message.includes('permission'))) {
+      res.status(400).json({ error: 'No GSC Property ID linked. Please select a property.' });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch GSC countries' });
+    }
   }
 };
 
@@ -64,8 +84,12 @@ export const getDevices = async (req: Request, res: Response) => {
     if (!site) return res.status(404).json({ error: 'Site not found' });
     const data = await getGscDevices(site.gscPropertyId || site.url, site.userId);
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch GSC devices' });
+  } catch (error: any) {
+    if (error.message && (error.message.includes('403') || error.message.includes('permission'))) {
+      res.status(400).json({ error: 'No GSC Property ID linked. Please select a property.' });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch GSC devices' });
+    }
   }
 };
 
@@ -87,8 +111,12 @@ export const getSitemaps = async (req: Request, res: Response) => {
     if (!site) return res.status(404).json({ error: 'Site not found' });
     const data = await getGscSitemaps(site.gscPropertyId || site.url, site.userId);
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch GSC sitemaps' });
+  } catch (error: any) {
+    if (error.message && (error.message.includes('403') || error.message.includes('permission'))) {
+      res.status(400).json({ error: 'No GSC Property ID linked. Please select a property.' });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch GSC sitemaps' });
+    }
   }
 };
 
@@ -100,8 +128,12 @@ export const inspectUrlEndpoint = async (req: Request, res: Response) => {
     if (!url) return res.status(400).json({ error: 'URL is required' });
     const data = await inspectUrl(site.gscPropertyId || site.url, url, site.userId);
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to inspect URL' });
+  } catch (error: any) {
+    if (error.message && (error.message.includes('403') || error.message.includes('permission'))) {
+      res.status(400).json({ error: 'No GSC Property ID linked. Please select a property.' });
+    } else {
+      res.status(500).json({ error: 'Failed to inspect URL' });
+    }
   }
 };
 
@@ -121,8 +153,12 @@ export const getSitesList = async (req: Request, res: Response) => {
   try {
     const data = await getGscSites(userId);
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch GSC sites' });
+  } catch (error: any) {
+    if (error.message && (error.message.includes('403') || error.message.includes('permission'))) {
+      res.status(400).json({ error: 'No GSC Property ID linked. Please select a property.' });
+    } else {
+      res.status(500).json({ error: 'Failed to fetch GSC sites' });
+    }
   }
 };
 
