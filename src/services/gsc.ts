@@ -132,13 +132,8 @@ export const resolveGscSiteUrl = async (dbSiteUrl: string, userId: string): Prom
       return partial.siteUrl;
     }
 
-    // Priority 4: First verified site
-    const firstOwned = entries.find(e => e.permissionLevel === 'siteOwner') || entries[0];
-    if (firstOwned?.siteUrl) {
-      console.log(`[GSC] No match for "${dbSiteUrl}", using first verified site: "${firstOwned.siteUrl}"`);
-      gscSiteUrlCache.set(cacheKey, { siteUrl: firstOwned.siteUrl, expiresAt: Date.now() + GSC_CACHE_TTL_MS });
-      return firstOwned.siteUrl;
-    }
+    // Priority 4 (Removed): We do not fallback to a random verified site. 
+    // It's better to return dbSiteUrl and let the Google API throw a 403 so the user is prompted to link correctly.
   } catch (err) {
     console.error('[GSC] Failed to resolve site URL:', err);
   }
