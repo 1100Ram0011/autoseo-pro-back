@@ -44,27 +44,81 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
       });
     }
 
-    // Auto-fetch and save first GA4 property if siteId exists
+    // Auto-fetch and save properties for GA4 and GSC if siteId exists
     if (siteId) {
        try {
-         const tempClient = new google.auth.OAuth2();
-         tempClient.setCredentials(tokens);
-         const admin = google.analyticsadmin({ version: 'v1beta', auth: tempClient });
-         const adminRes = await admin.accountSummaries.list();
-         if (adminRes.data.accountSummaries) {
-           let firstProperty = null;
-           for (const account of adminRes.data.accountSummaries) {
-             if (account.propertySummaries && account.propertySummaries.length > 0) {
-               firstProperty = account.propertySummaries[0]!.property || null;
-               break;
+         const site = await prisma.site.findUnique({ where: { id: siteId } });
+         if (site) {
+           const siteUrl = site.url;
+           const normalizedSiteUrl = siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '').replace(/^www\./, '').toLowerCase();
+
+           const tempClient = new google.auth.OAuth2();
+           tempClient.setCredentials(tokens);
+
+           let ga4ToSave = null;
+           let gscToSave = null;
+
+           // 1. GA4 Auto-Match
+           try {
+             const admin = google.analyticsadmin({ version: 'v1beta', auth: tempClient });
+             const adminRes = await admin.accountSummaries.list();
+             const allGa4Properties: {id: string, name: string}[] = [];
+             
+             if (adminRes.data.accountSummaries) {
+               for (const account of adminRes.data.accountSummaries) {
+                 if (account.propertySummaries) {
+                   for (const prop of account.propertySummaries) {
+                     if (prop.property && prop.displayName) {
+                       allGa4Properties.push({ id: prop.property, name: prop.displayName });
+                     }
+                   }
+                 }
+               }
              }
+
+             if (allGa4Properties.length === 1) {
+               ga4ToSave = allGa4Properties[0].id; // Only one property, just use it
+             } else if (allGa4Properties.length > 1) {
+               // Try to find exact match
+               const match = allGa4Properties.find(p => p.name.toLowerCase().includes(normalizedSiteUrl) || normalizedSiteUrl.includes(p.name.toLowerCase()));
+               if (match) ga4ToSave = match.id;
+             }
+           } catch (ga4Err) {
+             console.error('GA4 auto-match failed:', ga4Err);
            }
-           if (firstProperty) {
+
+           // 2. GSC Auto-Match
+           try {
+             const webmasters = google.webmasters({ version: 'v3', auth: tempClient });
+             const gscRes = await webmasters.sites.list();
+             const allGscProperties = gscRes.data.siteEntry || [];
+
+             if (allGscProperties.length === 1 && allGscProperties[0].siteUrl) {
+               gscToSave = allGscProperties[0].siteUrl; // Only one property
+             } else if (allGscProperties.length > 1) {
+               // Exact match
+               const match = allGscProperties.find(p => {
+                 if (!p.siteUrl) return false;
+                 const pUrl = p.siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '').replace(/^www\./, '').replace(/^sc-domain:/, '').toLowerCase();
+                 return pUrl === normalizedSiteUrl || pUrl.includes(normalizedSiteUrl) || normalizedSiteUrl.includes(pUrl);
+               });
+               if (match && match.siteUrl) gscToSave = match.siteUrl;
+             }
+           } catch (gscErr) {
+             console.error('GSC auto-match failed:', gscErr);
+           }
+
+           // Update DB if we found anything
+           if (ga4ToSave || gscToSave) {
+             const updateData: any = {};
+             if (ga4ToSave) updateData.ga4PropertyId = ga4ToSave;
+             if (gscToSave) updateData.gscPropertyId = gscToSave;
+             
              await prisma.site.update({
                where: { id: siteId },
-               data: { ga4PropertyId: firstProperty }
+               data: updateData
              });
-             console.log(`Auto-saved GA4 property ${firstProperty} for site ${siteId}`);
+             console.log(`Auto-saved properties for site ${siteId}: GA4=${ga4ToSave}, GSC=${gscToSave}`);
            }
          }
        } catch (propErr) {
