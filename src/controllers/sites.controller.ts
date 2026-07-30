@@ -105,6 +105,14 @@ export const updateSiteSettings = async (req: Request, res: Response) => {
       dataToUpdate.gscPropertyId = gscPropertyId || null;
     }
 
+    if (req.body.url !== undefined) {
+      let formattedUrl = req.body.url.trim().toLowerCase();
+      if (!/^https?:\/\//i.test(formattedUrl)) {
+        formattedUrl = `https://${formattedUrl}`;
+      }
+      dataToUpdate.url = formattedUrl;
+    }
+
     const updatedSite = await prisma.site.update({
       where: { id: req.params.id as string },
       data: dataToUpdate

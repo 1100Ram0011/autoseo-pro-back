@@ -129,8 +129,8 @@ export const runCrawl = async (req: Request, res: Response) => {
       });
     }
 
-    // Trigger crawl in background (async) so UI doesn't freeze
-    crawlSite(site.id, origin).catch(err => console.error('Background Crawl Error:', err));
+    // Await crawl so it finishes before responding, preventing serverless functions (like Vercel) from killing it prematurely
+    await crawlSite(site.id, origin);
 
     res.json({ message: 'Crawl initiated successfully', siteId: site.id });
   } catch (error) {

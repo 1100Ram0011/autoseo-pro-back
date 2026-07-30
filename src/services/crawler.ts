@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+
 import * as cheerio from 'cheerio';
 import prisma from '../config/prisma';
 
@@ -6,17 +6,20 @@ export async function crawlSite(siteId: string, startUrl: string) {
   console.log(`Starting crawl for site: ${startUrl}`);
   
   try {
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    // Using native fetch instead of Puppeteer to prevent Chromium dependency issues on production
+    const response = await fetch(startUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5'
+      }
     });
-    const page = await browser.newPage();
     
-    // We will do a basic single-page crawl for MVP, 
-    // extracting all internal links from the homepage.
-    await page.goto(startUrl, { waitUntil: 'networkidle2', timeout: 30000 });
-    const html = await page.content();
-    await browser.close();
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${startUrl}: ${response.status} ${response.statusText}`);
+    }
+    
+    const html = await response.text();
 
     const $ = cheerio.load(html);
     const links = new Set<string>();
