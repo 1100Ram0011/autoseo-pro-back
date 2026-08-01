@@ -108,20 +108,20 @@ export const deleteMapLead = async (req: Request, res: Response): Promise<any> =
 
 export const getMapLeadProgress = async (req: Request, res: Response): Promise<any> => {
     try {
-        const { jobId } = req.query;
-        if (!jobId) return res.json({ success: false, message: 'Job ID required' });
-        
-        const job = await leadsQueue.getJob(jobId as string);
-        if (!job) return res.json({ success: true, data: null, message: 'Job not found' });
+        const userId = (req as any).user?.id || req.query.userId || "1";
+        const { getLeadProgress } = await import('../services/scraperProgress');
+        const progress = await getLeadProgress(userId as string);
 
-        const state = await job.getState();
-        const progress = job.progress;
+        if (!progress) {
+            return res.json({ success: true, data: null, message: 'No active job found' });
+        }
 
-        return res.json({ success: true, data: { state, progress } });
+        return res.json({ success: true, data: progress });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Failed to get progress' });
     }
 };
+
 
 export const verifyMapLeadWhatsApp = async (req: Request, res: Response): Promise<any> => {
     try {

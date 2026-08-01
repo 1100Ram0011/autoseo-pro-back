@@ -1,58 +1,47 @@
+import axios from 'axios';
+
 export const generateKeywordIdeas = async (seedKeyword: string) => {
-  // TODO: Replace this mock implementation with actual Google Ads API integration
-  // once the Developer Token is approved.
-  
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
   if (!seedKeyword || seedKeyword.trim() === '') {
     return { ideas: [] };
   }
   
   const baseKeyword = seedKeyword.toLowerCase().trim();
-  
-  // Generate realistic-looking mock data based on the seed
-  const modifiers = [
-    'best', 'top', 'cheap', 'services', 'near me', 
-    'guide', 'how to', 'examples', 'agency', 'company',
-    'software', 'tools', 'free', 'online', 'cost'
-  ];
-  
-  // Create 5-8 random mock ideas
-  const numIdeas = Math.floor(Math.random() * 4) + 5;
   const ideas = [];
   
-  // Always include the exact match as the first result
-  ideas.push({
-    keyword: baseKeyword,
-    searchVolume: Math.floor(Math.random() * 50000) + 10000,
-    competition: 'HIGH',
-    cpcLow: (Math.random() * 2 + 0.5).toFixed(2),
-    cpcHigh: (Math.random() * 10 + 3.0).toFixed(2)
-  });
-  
-  for (let i = 0; i < numIdeas; i++) {
-    const randomMod = modifiers[Math.floor(Math.random() * modifiers.length)];
-    const isPrefix = Math.random() > 0.5;
-    const ideaKw = isPrefix ? `${randomMod} ${baseKeyword}` : `${baseKeyword} ${randomMod}`;
+  try {
+    // 1. Fetch real autocomplete suggestions from Google
+    const response = await axios.get(`http://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(baseKeyword)}`);
+    const suggestions = response.data[1] || [];
     
-    // Don't add duplicates
-    if (ideas.some(item => item.keyword === ideaKw)) continue;
-    
-    const compVal = Math.random();
-    const competition = compVal > 0.7 ? 'HIGH' : (compVal > 0.3 ? 'MEDIUM' : 'LOW');
-    
-    const vol = competition === 'HIGH' 
-      ? Math.floor(Math.random() * 10000) + 1000
-      : Math.floor(Math.random() * 1000) + 50;
-      
+    // 2. Add the base keyword first
     ideas.push({
-      keyword: ideaKw,
-      searchVolume: vol,
-      competition: competition,
-      cpcLow: (Math.random() * 1.5 + 0.1).toFixed(2),
-      cpcHigh: (Math.random() * 5 + 1.0).toFixed(2)
+      keyword: baseKeyword,
+      searchVolume: Math.floor(Math.random() * 50000) + 5000, // Still mock volume because Google API requires paid Ads access for real volume
+      competition: 'HIGH',
+      cpcLow: (Math.random() * 2 + 0.5).toFixed(2),
+      cpcHigh: (Math.random() * 10 + 3.0).toFixed(2)
     });
+    
+    // 3. Process the real autocomplete suggestions
+    for (const suggestion of suggestions) {
+      if (suggestion === baseKeyword) continue;
+      
+      const compVal = Math.random();
+      const competition = compVal > 0.7 ? 'HIGH' : (compVal > 0.3 ? 'MEDIUM' : 'LOW');
+      const vol = competition === 'HIGH' 
+        ? Math.floor(Math.random() * 10000) + 1000
+        : Math.floor(Math.random() * 1000) + 50;
+        
+      ideas.push({
+        keyword: suggestion,
+        searchVolume: vol,
+        competition: competition,
+        cpcLow: (Math.random() * 1.5 + 0.1).toFixed(2),
+        cpcHigh: (Math.random() * 5 + 1.0).toFixed(2)
+      });
+    }
+  } catch (error) {
+    console.error('Failed to fetch from Google Autocomplete:', error);
   }
   
   // Sort by volume descending

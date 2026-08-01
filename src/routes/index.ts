@@ -23,6 +23,8 @@ import alertsRoutes from './alerts.routes';
 import autoseoRoutes from './autoseo.routes';
 import anomalyRoutes from './anomaly.routes';
 import whatsappRoutes from './whatsapp.routes';
+import reportsRoutes from './reports.routes';
+import blogRoutes from './blog.routes';
 
 const router = Router();
 
@@ -45,10 +47,11 @@ router.use('/sites/:id/internal-links', linksRoutes);
 router.use('/sites/:id/gmb', gmbRoutes);
 router.use('/sites/:id/backlinks', backlinksRoutes);
 router.use('/sites/:id/alerts', alertsRoutes);
+router.use('/sites/:siteId/reports', reportsRoutes);
 router.use('/', keywordsRoutes);
 router.use('/leads', leadsRoutes);
 router.use('/campaigns', campaignsRoutes);
-router.use('/clarity', clarityRoutes);
+router.use('/', clarityRoutes);
 router.use('/anomalies', anomalyRoutes);
 router.use('/business', businessRoutes);
 router.use('/', gscRoutes);
@@ -59,6 +62,7 @@ router.use('/agents', agentsRoutes);
 router.use('/', billingRoutes);
 router.use('/autopilot', autopilotRoutes);
 router.use('/', autoseoRoutes);
+router.use('/blogs', blogRoutes);
 import scraperRoutes from './scraper.routes';
 
 router.use('/whatsapp', whatsappRoutes);

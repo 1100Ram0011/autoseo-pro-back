@@ -6,6 +6,12 @@ export const getSiteKeywords = async (req: Request, res: Response) => {
   try {
     const keywords = await prisma.keyword.findMany({
       where: { siteId: req.params.id as string },
+      include: {
+        history: {
+          orderBy: { date: 'asc' },
+          take: 30 // Get last 30 days for the sparkline
+        }
+      },
       orderBy: { createdAt: 'desc' }
     });
     res.json(keywords);

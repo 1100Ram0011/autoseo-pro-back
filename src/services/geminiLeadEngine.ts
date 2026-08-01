@@ -101,7 +101,12 @@ const fetchOneBatch = async (targetMarket: string, geographicFocus: string, batc
   }
 };
 
-export const fetchLeadsWithGemini = async (targetMarket: string, geographicFocus: string, limit: number = 10) => {
+export const fetchLeadsWithGemini = async (
+  targetMarket: string,
+  geographicFocus: string,
+  limit: number = 10,
+  onBatchProgress?: (percent: number, label: string) => void
+) => {
   console.log(`Gemini generating ${limit} leads | ${targetMarket} | ${geographicFocus}`);
 
   const BATCH_SIZE = 50;
@@ -112,8 +117,21 @@ export const fetchLeadsWithGemini = async (targetMarket: string, geographicFocus
 
   for (let i = 1; i <= totalBatches; i++) {
     const batchSize = i === totalBatches ? limit - (totalBatches - 1) * BATCH_SIZE : BATCH_SIZE;
+    
+    // Emit before-batch progress
+    if (onBatchProgress) {
+      const pct = Math.round(30 + (i - 1) / totalBatches * 45);
+      onBatchProgress(pct, `Querying AI for leads (batch ${i}/${totalBatches})…`);
+    }
+    
     const batchLeads = await fetchOneBatch(targetMarket, geographicFocus, batchSize, i);
     allRawLeads.push(...batchLeads);
+
+    // Emit after-batch progress
+    if (onBatchProgress) {
+      const pct = Math.round(30 + i / totalBatches * 45);
+      onBatchProgress(pct, `Got ${allRawLeads.length} raw leads so far…`);
+    }
 
     if (i < totalBatches) {
       await new Promise((r) => setTimeout(r, 2000));

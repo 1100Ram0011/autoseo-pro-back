@@ -28,6 +28,14 @@ model User {
   aiUsageCount Int      @default(0)
   agencyName   String?
   customDomain String?
+
+  // Blogger Integration
+  bloggerAccessToken   String?
+  bloggerRefreshToken  String?
+  bloggerExpiryDate    BigInt?
+  isBloggerConnected   Boolean   @default(false)
+
+  blogSessions BlogSession[]
 }
 
 model Site {
@@ -51,6 +59,8 @@ model Site {
   pages                   Page[]
   autoSeoReports          AutoSeoReport[]
   anomalies               AiAnomaly[]
+  clientReports           ClientReport[]
+  reportSchedules         ReportSchedule[]
   user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   visitors                Visitor[]
 
@@ -84,8 +94,21 @@ model Keyword {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  history   KeywordRankingHistory[]
 
   @@index([siteId])
+}
+
+model KeywordRankingHistory {
+  id        String   @id @default(uuid())
+  keywordId String
+  date      DateTime
+  position  Int?
+  volume    Int?
+  keyword   Keyword  @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  @@unique([keywordId, date])
+  @@index([keywordId])
 }
 
 model Visitor {
@@ -102,16 +125,35 @@ model Visitor {
 }
 
 model Blog {
-  id               String   @id @default(uuid())
+  id               String    @id @default(uuid())
   siteId           String
   title            String
   content          String
+  tags             String?   // JSON serialized array of strings or comma separated
+  coverImage       String?
+  bloggerUrl       String?
+  bloggerId        String?
+  status           String    @default("draft") // draft, queued, publishing, published, failed
+  jobId            String?
+  errorMessage     String?
+  publishedAt      DateTime?
   posted_platforms String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  site             Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  site             Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   @@index([siteId])
+}
+
+model BlogSession {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  titles     String?  // JSON serialized array of titles
+  drafts     String?  // JSON serialized array of drafts
+  activeJobs String?  // JSON serialized array of active jobs
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Lead {
@@ -406,3 +448,34 @@ model FirecrawlLog {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model ClientReport {
+  id        String   @id @default(uuid())
+  siteId    String
+  name      String
+  type      String
+  status    String   @default("Generated")
+  size      String?
+  fileUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+model ReportSchedule {
+  id        String   @id @default(uuid())
+  siteId    String
+  name      String
+  frequency String
+  emails    String
+  status    String   @default("Active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+// Trigger TS Server Update
