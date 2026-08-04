@@ -25,7 +25,7 @@ import anomalyRoutes from './anomaly.routes';
 import whatsappRoutes from './whatsapp.routes';
 import reportsRoutes from './reports.routes';
 import blogRoutes from './blog.routes';
-
+import paymentRoutes from './payment.routes';
 const router = Router();
 
 import usersRoutes from './users.routes';
@@ -63,6 +63,7 @@ router.use('/', billingRoutes);
 router.use('/autopilot', autopilotRoutes);
 router.use('/', autoseoRoutes);
 router.use('/blogs', blogRoutes);
+router.use('/payment', paymentRoutes);
 import scraperRoutes from './scraper.routes';
 
 router.use('/whatsapp', whatsappRoutes);
