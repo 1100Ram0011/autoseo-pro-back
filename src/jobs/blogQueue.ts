@@ -5,9 +5,9 @@ import { generateBlogFromTitle } from '../services/blogGeneration.service';
 
 export const BLOG_QUEUE_NAME = 'blog-generation-queue';
 
-export const blogQueue = new Queue(BLOG_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
+export const blogQueue = new Queue(BLOG_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
-export const blogQueueEvents = new QueueEvents(BLOG_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
+export const blogQueueEvents = new QueueEvents(BLOG_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
 interface BlogJobData {
   siteId: string;
@@ -48,7 +48,7 @@ export const blogWorker = new Worker<BlogJobData>(
       throw error;
     }
   },
-  { connection: redis, concurrency: 2, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true }
+  { connection: redis, concurrency: 2, skipVersionCheck: true }
 );
 
 blogWorker.on('completed', async (job, result) => {

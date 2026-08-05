@@ -9,9 +9,9 @@ import { uploadToS3, deleteFromS3 } from '../services/upload.service';
 
 export const WHATSAPP_VALIDATION_QUEUE_NAME = 'whatsapp-number-validation-queue';
 
-export const whatsappValidationQueue = new Queue(WHATSAPP_VALIDATION_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
+export const whatsappValidationQueue = new Queue(WHATSAPP_VALIDATION_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
-export const whatsappValidationQueueEvents = new QueueEvents(WHATSAPP_VALIDATION_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
+export const whatsappValidationQueueEvents = new QueueEvents(WHATSAPP_VALIDATION_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

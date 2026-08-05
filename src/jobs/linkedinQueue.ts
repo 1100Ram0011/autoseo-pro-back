@@ -5,9 +5,9 @@ import { ApifyClient } from 'apify-client';
 
 export const LINKEDIN_QUEUE_NAME = 'linkedin-api-lead-generation-queue';
 
-export const linkedinQueue = new Queue(LINKEDIN_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
+export const linkedinQueue = new Queue(LINKEDIN_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
-export const linkedinQueueEvents = new QueueEvents(LINKEDIN_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
+export const linkedinQueueEvents = new QueueEvents(LINKEDIN_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
 const client = new ApifyClient({
     token: process.env.APIFY_API_TOKEN || '',
