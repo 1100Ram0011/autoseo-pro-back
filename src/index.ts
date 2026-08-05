@@ -9,11 +9,11 @@ import { initSocket } from './socket';
 import { initClarityCron } from './services/claritySync';
 import { initNightlyMonitor } from './jobs/nightlyMonitor';
 import { initRankTrackerCron } from './jobs/rankTracker';
-import './jobs/leadsQueue';
-import './jobs/linkedinQueue';
-import './jobs/whatsappValidationQueue';
-import './jobs/firecrawlQueue';
-import './jobs/blogQueue';
+// import './jobs/leadsQueue';
+// import './jobs/linkedinQueue';
+// import './jobs/whatsappValidationQueue';
+// import './jobs/firecrawlQueue';
+// import './jobs/blogQueue';
 
 dotenv.config();
 
