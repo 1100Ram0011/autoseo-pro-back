@@ -113,13 +113,13 @@ export class AutoSeoEngine {
 
       // 5. Keywords
       this.emit('keywords', 'running', 'Analyzing keyword data & generating AI report...');
-      let keywordsData: any = MOCK_GSC.keywords.keywords.slice(0, 5);
+      let keywordsData: any = MOCK_GSC.keywords.keywords;
       try {
         const site = await prisma.site.findUnique({ where: { id: this.siteId } });
         const gscUrl = site?.gscPropertyId || this.url;
         const gscKeywordsRes = await getGscKeywords(gscUrl, this.userId, this.siteId);
         if (gscKeywordsRes?.keywords?.length > 0) {
-          keywordsData = gscKeywordsRes.keywords.slice(0, 10);
+          keywordsData = gscKeywordsRes.keywords;
         }
       } catch (e) {
         console.warn('GSC keywords fetch failed, using mock data', e);
@@ -150,7 +150,15 @@ export class AutoSeoEngine {
 
       // 7. Overall Summary
       this.emit('summary', 'running', 'Generating comprehensive final summary...');
-      const overallSummary = await this.generateAiReport(`You are an expert SEO consultant. Create a final, comprehensive executive summary for ${this.url} based on the fact that GA, GSC, Keywords, and Lighthouse have been analyzed. Highlight the top 3 most critical action items.`);
+      const overallSummary = await this.generateAiReport(`You are an expert SEO consultant. Create a final, comprehensive executive summary for ${this.url}. Here are the individual reports generated so far:
+      
+      Google Analytics Report: ${gaReport}
+      Google Search Console Report: ${gscReport}
+      Keywords Report: ${keywordReport}
+      Lighthouse Report: ${lighthouseReport}
+      Robots & Sitemap Report: ${robotsReport}
+      
+      Based on all this data, create a final, comprehensive executive summary and highlight the top 3 most critical action items.`);
       await prisma.autoSeoReport.update({
         where: { id: this.reportId },
         data: { overallSummary, status: 'Completed' }
