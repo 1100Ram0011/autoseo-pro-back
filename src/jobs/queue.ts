@@ -5,13 +5,9 @@ import prisma from '../config/prisma';
 
 export const SEO_QUEUE_NAME = 'seo-analysis-queue';
 
-export const seoQueue = new Queue(SEO_QUEUE_NAME, {
-  connection: redis
-});
+export const seoQueue = new Queue(SEO_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
 
-export const seoQueueEvents = new QueueEvents(SEO_QUEUE_NAME, {
-  connection: redis
-});
+export const seoQueueEvents = new QueueEvents(SEO_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
 
 interface SeoJobData {
   reportId: string;

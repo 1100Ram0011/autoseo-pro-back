@@ -7,13 +7,9 @@ import { scrapeWebsite } from '../services/scraper.service';
 
 export const FIRECRAWL_QUEUE_NAME = 'firecrawl-queue';
 
-export const firecrawlQueue = new Queue(FIRECRAWL_QUEUE_NAME, {
-  connection: redis
-});
+export const firecrawlQueue = new Queue(FIRECRAWL_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
 
-export const firecrawlQueueEvents = new QueueEvents(FIRECRAWL_QUEUE_NAME, {
-  connection: redis
-});
+export const firecrawlQueueEvents = new QueueEvents(FIRECRAWL_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
 
 export const firecrawlWorker = new Worker(FIRECRAWL_QUEUE_NAME, async (job) => {
   const { userId, websiteUrl } = job.data;
@@ -134,7 +130,7 @@ export const firecrawlWorker = new Worker(FIRECRAWL_QUEUE_NAME, async (job) => {
     console.error("Job failed", error);
     throw error;
   }
-}, { connection: redis });
+}, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
 
 firecrawlWorker.on('completed', (job) => {
   console.log(`Job ${job.id} has completed!`);

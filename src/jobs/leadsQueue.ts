@@ -7,8 +7,8 @@ import { emitToUser } from '../socket';
 
 export const LEADS_QUEUE_NAME = 'google-api-lead-generation-queue';
 
-export const leadsQueue = new Queue(LEADS_QUEUE_NAME, { connection: redis });
-export const leadsQueueEvents = new QueueEvents(LEADS_QUEUE_NAME, { connection: redis });
+export const leadsQueue = new Queue(LEADS_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
+export const leadsQueueEvents = new QueueEvents(LEADS_QUEUE_NAME, { connection: redis, drainDelay: 30000, stalledInterval: 300000, skipVersionCheck: true });
 
 interface LeadJobData {
   targetMarket: string;
