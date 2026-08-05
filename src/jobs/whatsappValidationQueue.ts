@@ -48,7 +48,8 @@ const parseFile = (buffer: Buffer, fileName: string) => {
   return XLSX.utils.sheet_to_json(worksheet, { defval: "", raw: false }).map(normalizeRow);
 };
 
-export const whatsappValidationWorker = new Worker(
+/* 
+export const  = new Worker(
   WHATSAPP_VALIDATION_QUEUE_NAME,
   async (job) => {
     const { jobId, accountId } = job.data;
@@ -167,3 +168,5 @@ whatsappValidationWorker.on('completed', (job) => {
 whatsappValidationWorker.on('failed', (job, err) => {
   console.log(`[VALIDATOR Worker] Job ${job?.id} failed with error ${err.message}`);
 });
+
+*/

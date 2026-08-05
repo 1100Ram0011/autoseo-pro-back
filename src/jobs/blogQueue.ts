@@ -14,7 +14,8 @@ interface BlogJobData {
   blogPageUrl?: string;
 }
 
-export const blogWorker = new Worker<BlogJobData>(
+/* 
+export const  = new Worker<BlogJobData>(
   BLOG_QUEUE_NAME,
   async (job) => {
     const { siteId, selectedTitle, userId, blogPageUrl } = job.data;
@@ -87,3 +88,5 @@ blogWorker.on('failed', async (job, err) => {
     }
   }
 });
+
+*/

@@ -15,7 +15,8 @@ interface SeoJobData {
 }
 
 // Background Worker processing jobs
-export const seoWorker = new Worker<SeoJobData>(
+/* 
+export const  = new Worker<SeoJobData>(
   SEO_QUEUE_NAME,
   async (job) => {
     console.log(`[BullMQ] Processing Job ${job.id} for site ${job.data.siteId}`);
@@ -54,3 +55,5 @@ seoWorker.on('completed', (job) => {
 seoWorker.on('failed', (job, err) => {
   console.error(`[Worker] Job ${job?.id} has failed with ${err.message}`);
 });
+
+*/

@@ -17,7 +17,8 @@ interface LinkedinJobData {
   mapLeadId: string;
 }
 
-export const linkedinWorker = new Worker<LinkedinJobData>(
+/* 
+export const  = new Worker<LinkedinJobData>(
   LINKEDIN_QUEUE_NAME,
   async (job) => {
     const { companyName, userId, mapLeadId } = job.data;
@@ -241,3 +242,5 @@ linkedinWorker.on('completed', (job) => {
 linkedinWorker.on('failed', (job, err) => {
   console.error(`[Linkedin Worker] Job ${job?.id} failed:`, err.message);
 });
+
+*/

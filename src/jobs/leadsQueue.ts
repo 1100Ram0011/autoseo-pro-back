@@ -21,7 +21,8 @@ async function emitProgress(userId: string, event: string, data: Record<string, 
   await setLeadProgress({ userId, event, data });
 }
 
-export const leadsWorker = new Worker<LeadJobData>(
+/* 
+export const  = new Worker<LeadJobData>(
   LEADS_QUEUE_NAME,
   async (job) => {
     const { targetMarket, geographicFocus, numberOfLeads, userId } = job.data;
@@ -189,3 +190,5 @@ leadsWorker.on('completed', (job) => {
 leadsWorker.on('failed', (job, err) => {
   console.error(`[Leads Worker] Job ${job?.id} has failed with ${err.message}`);
 });
+
+*/

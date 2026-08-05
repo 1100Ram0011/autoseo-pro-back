@@ -9,7 +9,8 @@ export const FIRECRAWL_QUEUE_NAME = 'firecrawl-queue';
 
 export const firecrawlQueue = new Queue(FIRECRAWL_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
-export const firecrawlWorker = new Worker(FIRECRAWL_QUEUE_NAME, async (job) => {
+/* 
+export const  = new Worker(FIRECRAWL_QUEUE_NAME, async (job) => {
   const { userId, websiteUrl } = job.data;
 
   console.log("🚀 Scraper Job Started:", {
@@ -137,3 +138,5 @@ firecrawlWorker.on('completed', (job) => {
 firecrawlWorker.on('failed', (job, err) => {
   console.error(`Job ${job?.id} has failed with ${err.message}`);
 });
+
+*/
