@@ -178,7 +178,7 @@ export const leadsWorker = new Worker<LeadJobData>(
   {
     connection: redis,
     concurrency: 2,
-    metrics: { maxDataPoints: 0 }
+    metrics: { maxDataPoints: 0 }, drainDelay: 60, stalledInterval: 300000
   }
 );
 

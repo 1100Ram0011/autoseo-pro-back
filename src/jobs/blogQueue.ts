@@ -46,7 +46,7 @@ export const blogWorker = new Worker<BlogJobData>(
       throw error;
     }
   },
-  { connection: redis, concurrency: 2, skipVersionCheck: true, metrics: { maxDataPoints: 0 } }
+  { connection: redis, concurrency: 2, skipVersionCheck: true, metrics: { maxDataPoints: 0 }, drainDelay: 60, stalledInterval: 300000 }
 );
 
 blogWorker.on('completed', async (job, result) => {

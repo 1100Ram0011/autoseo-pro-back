@@ -230,7 +230,7 @@ export const linkedinWorker = new Worker<LinkedinJobData>(
   {
     connection: redis,
     concurrency: 1, // Be nice to Apify
-    metrics: { maxDataPoints: 0 }
+    metrics: { maxDataPoints: 0 }, drainDelay: 60, stalledInterval: 300000
   }
 );
 

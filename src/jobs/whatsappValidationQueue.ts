@@ -157,7 +157,7 @@ export const whatsappValidationWorker = new Worker(
   {
     connection: redis,
     concurrency: 1,
-    metrics: { maxDataPoints: 0 }
+    metrics: { maxDataPoints: 0 }, drainDelay: 60, stalledInterval: 300000
   }
 );
 

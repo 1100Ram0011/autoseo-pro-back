@@ -128,7 +128,7 @@ export const firecrawlWorker = new Worker(FIRECRAWL_QUEUE_NAME, async (job) => {
     console.error("Job failed", error);
     throw error;
   }
-}, { connection: redis, skipVersionCheck: true, metrics: { maxDataPoints: 0 } });
+}, { connection: redis, skipVersionCheck: true, metrics: { maxDataPoints: 0 }, drainDelay: 60, stalledInterval: 300000 });
 
 firecrawlWorker.on('completed', (job) => {
   console.log(`Job ${job.id} has completed!`);

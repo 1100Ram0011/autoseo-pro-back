@@ -43,7 +43,7 @@ export const seoWorker = new Worker<SeoJobData>(
   {
     connection: redis,
     concurrency: 5, // Process up to 5 sites concurrently
-    metrics: { maxDataPoints: 0 }
+    metrics: { maxDataPoints: 0 }, drainDelay: 60, stalledInterval: 300000
   }
 );
 
