@@ -7,8 +7,6 @@ export const LINKEDIN_QUEUE_NAME = 'linkedin-api-lead-generation-queue';
 
 export const linkedinQueue = new Queue(LINKEDIN_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
-export const linkedinQueueEvents = new QueueEvents(LINKEDIN_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
-
 const client = new ApifyClient({
     token: process.env.APIFY_API_TOKEN || '',
 });
@@ -232,6 +230,7 @@ export const linkedinWorker = new Worker<LinkedinJobData>(
   {
     connection: redis,
     concurrency: 1, // Be nice to Apify
+    metrics: { maxDataPoints: 0 }
   }
 );
 

@@ -9,8 +9,6 @@ export const FIRECRAWL_QUEUE_NAME = 'firecrawl-queue';
 
 export const firecrawlQueue = new Queue(FIRECRAWL_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
-export const firecrawlQueueEvents = new QueueEvents(FIRECRAWL_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
-
 export const firecrawlWorker = new Worker(FIRECRAWL_QUEUE_NAME, async (job) => {
   const { userId, websiteUrl } = job.data;
 
@@ -130,7 +128,7 @@ export const firecrawlWorker = new Worker(FIRECRAWL_QUEUE_NAME, async (job) => {
     console.error("Job failed", error);
     throw error;
   }
-}, { connection: redis, skipVersionCheck: true });
+}, { connection: redis, skipVersionCheck: true, metrics: { maxDataPoints: 0 } });
 
 firecrawlWorker.on('completed', (job) => {
   console.log(`Job ${job.id} has completed!`);

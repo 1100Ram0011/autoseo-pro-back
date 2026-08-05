@@ -7,8 +7,6 @@ export const SEO_QUEUE_NAME = 'seo-analysis-queue';
 
 export const seoQueue = new Queue(SEO_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
-export const seoQueueEvents = new QueueEvents(SEO_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
-
 interface SeoJobData {
   reportId: string;
   siteId: string;
@@ -45,6 +43,7 @@ export const seoWorker = new Worker<SeoJobData>(
   {
     connection: redis,
     concurrency: 5, // Process up to 5 sites concurrently
+    metrics: { maxDataPoints: 0 }
   }
 );
 

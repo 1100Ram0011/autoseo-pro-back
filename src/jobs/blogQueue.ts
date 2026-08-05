@@ -7,8 +7,6 @@ export const BLOG_QUEUE_NAME = 'blog-generation-queue';
 
 export const blogQueue = new Queue(BLOG_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
-export const blogQueueEvents = new QueueEvents(BLOG_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
-
 interface BlogJobData {
   siteId: string;
   selectedTitle: string;
@@ -48,7 +46,7 @@ export const blogWorker = new Worker<BlogJobData>(
       throw error;
     }
   },
-  { connection: redis, concurrency: 2, skipVersionCheck: true }
+  { connection: redis, concurrency: 2, skipVersionCheck: true, metrics: { maxDataPoints: 0 } }
 );
 
 blogWorker.on('completed', async (job, result) => {

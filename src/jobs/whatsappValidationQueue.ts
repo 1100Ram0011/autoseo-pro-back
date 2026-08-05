@@ -11,8 +11,6 @@ export const WHATSAPP_VALIDATION_QUEUE_NAME = 'whatsapp-number-validation-queue'
 
 export const whatsappValidationQueue = new Queue(WHATSAPP_VALIDATION_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
 
-export const whatsappValidationQueueEvents = new QueueEvents(WHATSAPP_VALIDATION_QUEUE_NAME, { connection: redis, skipVersionCheck: true });
-
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const normalizeRow = (row: any) => {
@@ -159,6 +157,7 @@ export const whatsappValidationWorker = new Worker(
   {
     connection: redis,
     concurrency: 1,
+    metrics: { maxDataPoints: 0 }
   }
 );
 
