@@ -124,6 +124,18 @@ export const updateSiteSettings = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteSite = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    await prisma.page.deleteMany({ where: { siteId: id } }); // delete related pages first
+    await prisma.site.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Failed to delete site:', error);
+    res.status(500).json({ error: 'Failed to delete site' });
+  }
+};
+
 export const autoDetectGscProperty = async (req: Request, res: Response) => {
   try {
     const site = await prisma.site.findUnique({ where: { id: req.params.id as string } });
@@ -143,10 +155,18 @@ export const autoDetectGscProperty = async (req: Request, res: Response) => {
     );
 
     if (match) {
+      let siteUrlToUpdate = match.siteUrl;
+      if (siteUrlToUpdate.startsWith('sc-domain:')) {
+        siteUrlToUpdate = 'https://' + siteUrlToUpdate.replace('sc-domain:', '');
+      }
+
       const updatedSite = await prisma.site.update({
         where: { id: site.id },
         // @ts-ignore - Prisma Client needs to be generated
-        data: { gscPropertyId: match.siteUrl }
+        data: { 
+          gscPropertyId: match.siteUrl,
+          url: siteUrlToUpdate
+        }
       });
       return res.json({ success: true, propertyId: match.siteUrl, site: updatedSite });
     }
