@@ -9,7 +9,7 @@ export const getReports = async (req: Request, res: Response) => {
     const siteId = req.params.siteId as string;
     
     // Ensure the site belongs to the user
-    // Note: Assuming req.user is set by your auth middleware
+    // Note: Assuming (req as any).user is set by your auth middleware
     const site = await prisma.site.findFirst({
       where: {
         id: siteId,

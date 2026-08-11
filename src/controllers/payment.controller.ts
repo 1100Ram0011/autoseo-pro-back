@@ -12,7 +12,7 @@ export const initializeScanPay = async (req: Request, res: Response, next: NextF
     const { planId, email } = req.body;
     
     // We expect the user to be authenticated, but we also fall back to email
-    // req.user might be set if we use auth middleware
+    // (req as any).user might be set if we use auth middleware
     const userId = (req as any).user?.id || req.body.userId;
 
     const PLAN_PRICES: Record<string, number> = {

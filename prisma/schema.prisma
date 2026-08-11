@@ -8,39 +8,51 @@ datasource db {
 }
 
 model User {
-  id                 String     @id @default(cuid())
-  email              String     @unique
-  name               String?
-  image              String?
-  stripeCustomerId   String?
-  planId             String         @default("free")
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-  googleRefreshToken String?
-  apiKey             String?        @unique
-  campaigns          Campaign[]
-  leads              Lead[]
-  mapLeads           MapLead[]
-  linkedinLeads      LinkedinLead[]
-  sites              Site[]
-
-  // Phase 6
-  aiUsageCount Int      @default(0)
-  agencyName   String?
-  customDomain String?
-
-  // Blogger Integration
+  id                   String                 @id @default(cuid())
+  email                String                 @unique
+  name                 String?
+  image                String?
+  stripeCustomerId     String?
+  planId               String                 @default("free")
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  googleRefreshToken   String?
+  apiKey               String?                @unique
+  aiUsageCount         Int                    @default(0)
+  agencyName           String?
+  customDomain         String?
   bloggerAccessToken   String?
-  bloggerRefreshToken  String?
   bloggerExpiryDate    BigInt?
-  isBloggerConnected   Boolean   @default(false)
+  bloggerRefreshToken  String?
+  isBloggerConnected   Boolean                @default(false)
+  credits              Int                    @default(0)
+  isUnlimited          Boolean                @default(false)
+  planExpiry           DateTime?
+  AIEmailTemplate      AIEmailTemplate[]
+  blogSessions         BlogSession?
+  campaigns            Campaign[]
+  CampaignRecipientLog CampaignRecipientLog[]
+  EmailCampaign        EmailCampaign[]
+  EmailTemplate        EmailTemplate[]
+  EmailToken           EmailToken[]
+  EmailUnsubscribe     EmailUnsubscribe[]
+  leads                Lead[]
+  linkedinLeads        LinkedinLead[]
+  mapLeads             MapLead[]
+  MediaStore           MediaStore[]
+  sites                Site[]
+  transactions         Transaction[]
 
-  planExpiry         DateTime?
-  credits            Int       @default(0)
-  isUnlimited        Boolean   @default(false)
-  transactions       Transaction[]
+  whatsappTokens       WhatsAppToken[]
+  whatsappTemplates    WhatsAppTemplate[]
+  whatsappContactLists WhatsAppContactList[]
+  whatsappCampaigns    WhatsAppCampaign[]
 
-  blogSessions BlogSession[]
+  metaWhatsappChatbots     MetaWhatsappChatbot[]
+  metaWhatsappChatbotFlows MetaWhatsappChatbotFlow[]
+  metaWhatsappInteractives MetaWhatsappInteractive[]
+  metaWhatsappAnalytics    MetaWhatsappAnalytics[]
+  whatsappApiKeys          WhatsAppApiKey[]
 }
 
 model Site {
@@ -53,18 +65,18 @@ model Site {
   updatedAt               DateTime                 @updatedAt
   ga4PropertyId           String?
   gscPropertyId           String?
+  anomalies               AiAnomaly[]
   alerts                  Alert[]
+  autoSeoReports          AutoSeoReport[]
   backlinks               Backlink[]
   blogs                   Blog[]
   clarityMetrics          ClarityMetric[]
+  clientReports           ClientReport[]
   competitors             Competitor[]
   gmbProfiles             GMBProfile[]
   internalLinkSuggestions InternalLinkSuggestion[]
   keywords                Keyword[]
   pages                   Page[]
-  autoSeoReports          AutoSeoReport[]
-  anomalies               AiAnomaly[]
-  clientReports           ClientReport[]
   reportSchedules         ReportSchedule[]
   user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   visitors                Visitor[]
@@ -91,14 +103,14 @@ model Page {
 }
 
 model Keyword {
-  id        String   @id @default(uuid())
+  id        String                  @id @default(uuid())
   siteId    String
   keyword   String
   volume    Int?
   position  Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+  site      Site                    @relation(fields: [siteId], references: [id], onDelete: Cascade)
   history   KeywordRankingHistory[]
 
   @@index([siteId])
@@ -134,17 +146,17 @@ model Blog {
   siteId           String
   title            String
   content          String
-  tags             String?   // JSON serialized array of strings or comma separated
-  coverImage       String?
-  bloggerUrl       String?
-  bloggerId        String?
-  status           String    @default("draft") // draft, queued, publishing, published, failed
-  jobId            String?
-  errorMessage     String?
-  publishedAt      DateTime?
   posted_platforms String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  bloggerId        String?
+  bloggerUrl       String?
+  coverImage       String?
+  errorMessage     String?
+  jobId            String?
+  publishedAt      DateTime?
+  status           String    @default("draft")
+  tags             String?
   site             Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   @@index([siteId])
@@ -153,9 +165,9 @@ model Blog {
 model BlogSession {
   id         String   @id @default(uuid())
   userId     String   @unique
-  titles     String?  // JSON serialized array of titles
-  drafts     String?  // JSON serialized array of drafts
-  activeJobs String?  // JSON serialized array of active jobs
+  titles     String?
+  drafts     String?
+  activeJobs String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -214,10 +226,10 @@ model Competitor {
   url        String
   createdAt  DateTime            @default(now())
   updatedAt  DateTime            @updatedAt
-  site       Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  keywords   CompetitorKeyword[]
   aiStrategy String?
   contentGap String?
+  site       Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  keywords   CompetitorKeyword[]
 }
 
 model CompetitorKeyword {
@@ -303,14 +315,14 @@ model Alert {
 model AiAnomaly {
   id          String     @id @default(uuid())
   siteId      String
-  type        String // e.g., "TRAFFIC_DROP", "KEYWORD_DROP"
+  type        String
   description String
-  severity    String // "High", "Medium", "Low"
-  status      String     @default("DETECTED") // DETECTED, RESOLVED, IGNORED
+  severity    String
+  status      String     @default("DETECTED")
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  site        Site       @relation(fields: [siteId], references: [id], onDelete: Cascade)
   actions     AiAction[]
+  site        Site       @relation(fields: [siteId], references: [id], onDelete: Cascade)
 }
 
 model AiAction {
@@ -328,18 +340,18 @@ model AutoSeoReport {
   id               String   @id @default(uuid())
   siteId           String
   url              String
-  status           String   @default("Pending") // Pending, InProgress, Completed, Failed
-  gaData           String? // JSON
-  gaReport         String? // AI Report
-  gscData          String? // JSON
-  gscReport        String? // AI Report
-  robotsData       String? // JSON
-  robotsReport     String? // AI Report
-  keywordData      String? // JSON
-  keywordReport    String? // AI Report
-  lighthouseData   String? // JSON
-  lighthouseReport String? // AI Report
-  overallSummary   String? // AI Report
+  status           String   @default("Pending")
+  gaData           String?
+  gaReport         String?
+  gscData          String?
+  gscReport        String?
+  robotsData       String?
+  robotsReport     String?
+  keywordData      String?
+  keywordReport    String?
+  lighthouseData   String?
+  lighthouseReport String?
+  overallSummary   String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   site             Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
@@ -350,8 +362,8 @@ model MapLead {
   userId                   String
   name                     String
   phone                    String?       @default("N/A")
-  additionalPhones         String? // JSON serialized string or comma separated
-  emails                   String? // JSON serialized string or comma separated
+  additionalPhones         String?
+  emails                   String?
   address                  String?
   website                  String?       @default("N/A")
   linkedin                 String?       @default("N/A")
@@ -368,43 +380,41 @@ model MapLead {
   search_query             String?
   status                   String?       @default("online")
   isWhatsAppNumber         Boolean?
-  whatsappProcessingStatus String? // e.g. PENDING, COMPLETED, FAILED
+  whatsappProcessingStatus String?
   whatsappCheckedAt        DateTime?
   createdAt                DateTime      @default(now())
   updatedAt                DateTime      @updatedAt
-  user                     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   linkedinLead             LinkedinLead?
+  user                     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, placeId])
   @@index([userId])
 }
 
 model LinkedinLead {
-  id             String   @id @default(uuid())
-  userId         String
-  mapLeadId      String   @unique
-  companyName    String
-  linkedinUrl    String?
-  industry       String?
-  employeeCount  Int?
-  website        String?
-  description    String?
-  followers      Int?
-  companySize    String?
-  headquarters   String?
-  logoUrl        String?
-  status         String   // pending, searching_url, scraping_company, scraping_employees, completed, failed
-  
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mapLead        MapLead  @relation(fields: [mapLeadId], references: [id], onDelete: Cascade)
-  employees      LinkedinEmployee[]
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String             @id @default(uuid())
+  userId        String
+  mapLeadId     String             @unique
+  companyName   String
+  linkedinUrl   String?
+  industry      String?
+  employeeCount Int?
+  website       String?
+  description   String?
+  followers     Int?
+  companySize   String?
+  headquarters  String?
+  logoUrl       String?
+  status        String
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  employees     LinkedinEmployee[]
+  mapLead       MapLead            @relation(fields: [mapLeadId], references: [id], onDelete: Cascade)
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model LinkedinEmployee {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   linkedinLeadId String
   name           String
   title          String?
@@ -419,13 +429,12 @@ model LinkedinEmployee {
   mobilePhone    String?
   pictureUrl     String?
   profileUrl     String?
-  premium        Boolean  @default(false)
-
+  premium        Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   linkedinLead   LinkedinLead @relation(fields: [linkedinLeadId], references: [id], onDelete: Cascade)
-
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
 }
+
 model WhatsappValidationJob {
   id               String   @id @default(uuid())
   accountId        String
@@ -446,10 +455,10 @@ model FirecrawlLog {
   websiteUrl   String
   websiteHash  String
   firecrawlUrl String?
-  source       String   @default("FIRECRAWL_API") // e.g. "CUSTOM_SCRAPER" or "FIRECRAWL_API"
-  status       String   @default("success") // "success" or "failed"
+  source       String   @default("FIRECRAWL_API")
+  status       String   @default("success")
   errorMessage String?
-  response     String?  // We will store the JSON response as a stringified payload for SQLite
+  response     String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -483,8 +492,6 @@ model ReportSchedule {
   @@index([siteId])
 }
 
-// Trigger TS Server Update
-
 model Transaction {
   id               String   @id @default(uuid())
   transactionId    String   @unique
@@ -496,8 +503,525 @@ model Transaction {
   status           String   @default("PENDING")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-  user             User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user             User?    @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([transactionId])
 }
+
+model AIEmailTemplate {
+  id           String   @id @default(cuid())
+  name         String
+  subject      String
+  html         String
+  design       String   @default("")
+  prompt       String   @default("")
+  category     String   @default("General")
+  description  String   @default("")
+  thumbnailUrl String   @default("")
+  variables    String[] @default([])
+  tags         String[] @default([])
+  usageCount   Int      @default(0)
+  createdById  String
+  isActive     Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+  version      Int      @default(1)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  User         User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([category, isActive])
+  @@index([isFeatured])
+}
+
+model CampaignRecipientLog {
+  id             String        @id @default(cuid())
+  campaignId     String
+  senderUserId   String
+  recipientEmail String
+  recipientName  String?
+  companyName    String?
+  status         String        @default("queued")
+  senderEmail    String?
+  senderTokenId  String?
+  messageId      String?
+  errorReason    String?
+  sentAt         DateTime?
+  openedAt       DateTime?
+  clickedAt      DateTime?
+  dataFile       Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  EmailCampaign  EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  EmailToken     EmailToken?   @relation(fields: [senderTokenId], references: [id])
+  User           User          @relation(fields: [senderUserId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, recipientEmail])
+  @@index([senderUserId])
+}
+
+model EmailCampaign {
+  id                   String                 @id @default(cuid())
+  name                 String
+  userId               String
+  provider             String
+  templateId           String
+  senderEmail          String?
+  campaignMail         String?
+  companyName          String?
+  companyAddress       String?
+  excelFileUrl         String?
+  excelFileKey         String?
+  totalRecipients      Int                    @default(0)
+  sentCount            Int                    @default(0)
+  failedCount          Int                    @default(0)
+  skipCount            Int                    @default(0)
+  openedCount          Int                    @default(0)
+  clickedCount         Int                    @default(0)
+  status               String                 @default("pending")
+  startedAt            DateTime?
+  completedAt          DateTime?
+  holdReason           String?
+  resumeAt             DateTime?
+  rolloverAttempts     Int                    @default(0)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  CampaignRecipientLog CampaignRecipientLog[]
+  template             EmailTemplate          @relation(fields: [templateId], references: [id])
+  User                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, provider])
+}
+
+model EmailTemplate {
+  id                 String          @id @default(cuid())
+  userId             String
+  name               String
+  subject            String
+  html               String
+  variables          String[]        @default([])
+  attachments        Json            @default("[]")
+  isActive           Boolean         @default(true)
+  version            Int             @default(1)
+  design             String?
+  sourcePrompt       String          @default("")
+  isAIGenerated      Boolean         @default(false)
+  sourceAITemplateId String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  campaigns          EmailCampaign[]
+  User               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isActive])
+}
+
+model EmailToken {
+  id                   String                 @id @default(cuid())
+  userId               String
+  provider             String
+  accountType          String                 @default("free")
+  tier                 String                 @default("unknown")
+  limitConfidence      String                 @default("low")
+  limitSource          String                 @default("profile_detection")
+  email                String?
+  accessToken          String?
+  refreshToken         String?
+  appPassword          String?
+  expiresAt            DateTime?
+  scope                String?
+  isActive             Boolean                @default(true)
+  status               String                 @default("active")
+  dailyLimit           Int                    @default(500)
+  lifetimeSent         Int                    @default(0)
+  lifetimeFailed       Int                    @default(0)
+  lastUsedAt           DateTime               @default(now())
+  metadata             Json                   @default("{}")
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  CampaignRecipientLog CampaignRecipientLog[]
+  User                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider, email])
+  @@index([userId])
+}
+
+model EmailUnsubscribe {
+  id             String    @id @default(cuid())
+  email          String
+  userId         String
+  campaignId     String?
+  token          String    @unique
+  unsubscribedAt DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  User           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([email, userId])
+  @@index([userId])
+}
+
+model MediaStore {
+  id               String        @id @default(cuid())
+  userId            String
+  chatId            String?
+  messageId         String?
+  imageThumbnailUrl String?
+  mediaUrl          String
+  mediaType         String
+  description       String?
+  hashtags          String?
+  source            String   @default("ai")
+  uploadType        String   @default("ai")
+  uploadedAt        DateTime @default(now())
+  websiteUrl        String?
+  isMediaDeleted    Boolean  @default(false)
+  isArchived        Boolean  @default(false)
+  isUserDeleted     Boolean  @default(false)
+  isUnderReview     Boolean  @default(true)
+  isRejected        Boolean  @default(false)
+  streamType        String?
+  generationSource  String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  User              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────
+// WHATSAPP CAMPAIGN MODELS
+// ─────────────────────────────────────────────────────────────
+
+model WhatsAppToken {
+  id                 String    @id @default(cuid())
+  userId             String
+  label              String    @default("")
+  isPrimary          Boolean   @default(false)
+  phoneNumberId      String
+  wabaId             String
+  displayName        String?
+  phoneNumber        String?
+  accessToken        String
+  appId              String?
+  appSecret          String?
+  expiresAt          DateTime?
+  tokenType          String    @default("permanent")
+  webhookVerifyToken String?
+  status             String    @default("active")
+  qualityRating      String    @default("UNKNOWN")
+  messagingLimit     String    @default("UNKNOWN")
+  lastVerifiedAt     DateTime?
+  businessProfile    Json?
+
+  logs         WhatsAppLog[]             @relation("NumberLogs")
+  user         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templates    WhatsAppTemplate[]
+  campaigns    WhatsAppCampaign[]
+  interactives MetaWhatsappInteractive[]
+  apiKeys      WhatsAppApiKey[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, phoneNumberId])
+}
+
+model WhatsAppTemplate {
+  id             String  @id @default(cuid())
+  userId         String
+  numberId       String
+  name           String
+  language       String
+  category       String
+  components     Json
+  status         String  @default("PENDING")
+  metaTemplateId String?
+  rejectedReason String?
+  qualityScore   String?
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     WhatsAppToken      @relation(fields: [numberId], references: [id], onDelete: Cascade)
+  campaigns WhatsAppCampaign[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WhatsAppContactList {
+  id          String  @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  count       Int     @default(0)
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contacts  WhatsAppContact[]
+  campaigns WhatsAppCampaign[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WhatsAppContact {
+  id          String  @id @default(cuid())
+  userId      String
+  listId      String
+  phoneNumber String
+  name        String?
+  variables   Json?
+  customFields Json?
+  source      String?
+  isValid     Boolean @default(true)
+
+  list WhatsAppContactList @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, phoneNumber])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WhatsAppCampaign {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  numberId    String
+  templateId  String
+  listId      String?
+  status      String    @default("DRAFT")
+  scheduleAt  DateTime?
+
+  // Stats
+  total     Int @default(0)
+  sent      Int @default(0)
+  delivered Int @default(0)
+  read      Int @default(0)
+  failed    Int @default(0)
+
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token    WhatsAppToken        @relation(fields: [numberId], references: [id], onDelete: Cascade)
+  template WhatsAppTemplate     @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  list     WhatsAppContactList? @relation(fields: [listId], references: [id], onDelete: SetNull)
+  logs     WhatsAppLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WhatsAppLog {
+  id             String    @id @default(cuid())
+  userId         String?
+  campaignId     String?
+  numberId       String?
+  whatsappNumber String?
+  direction      String?
+  messageType    String?
+  customerNumber String?
+  templateName   String?
+  campaignName   String?
+  status         String    @default("PENDING")
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+  readAt         DateTime?
+  failedAt       DateTime?
+  errorCode      String?
+  errorMessage   String?
+  origin         String?
+  content        String?
+  messageId      String?
+
+  campaign WhatsAppCampaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  number   WhatsAppToken?    @relation("NumberLogs", fields: [numberId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MetaWhatsappChatbotFlow {
+  id            String   @id @default(cuid())
+  name          String
+  userId        String
+  phoneNumberId String
+  isActive      Boolean  @default(true)
+  description   String?
+  layout        Json?
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatbots      MetaWhatsappChatbot[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, phoneNumberId, name])
+}
+
+model MetaWhatsappChatbot {
+  id                 String   @id @default(cuid())
+  userId             String
+  phoneNumberId      String
+  triggerType        String   @default("keyword") // "keyword", "button_payload", "api_response", "condition_branch", "next_step"
+  triggerValue       String
+  replyType          String   @default("text") // "text", "interactive", "meta_template", "api_request", "set_attribute", "add_tag", "intervention", "condition"
+  replyText          String?
+  replyInteractiveId String?
+  templateName       String?
+  templateLanguage   String?  @default("en")
+  templateParams     Json?
+  flowId             String?
+  apiUrl             String?
+  apiBody            String?
+  apiMethod          String?  @default("POST")
+  apiHeaders         Json?
+  apiParams          Json?
+  responseAttributes Json?
+  attributeName      String?
+  attributeValue     String?
+  tagName            String?
+  conditionAttribute String?
+  conditionOperator  String?
+  conditionValue     String?
+  isActive           Boolean  @default(true)
+
+  user               User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flow               MetaWhatsappChatbotFlow?   @relation(fields: [flowId], references: [id], onDelete: SetNull)
+  interactive        MetaWhatsappInteractive?   @relation(fields: [replyInteractiveId], references: [id], onDelete: SetNull)
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([phoneNumberId, flowId, triggerValue])
+}
+
+model MetaWhatsappInteractive {
+  id             String   @id @default(cuid())
+  userId         String
+  numberId       String
+  name           String
+  type           String   // "button", "list"
+  headerType     String?  @default("text")
+  headerText     String?
+  mediaUrl       String?
+  mediaFilename  String?
+  bodyText       String
+  footerText     String?
+  
+  buttons        Json?    // Array of {id, title}
+  listButtonText String?
+  sections       Json?    // Array of {title, rows: [{id, title, description}]}
+
+  user           User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token          WhatsAppToken          @relation(fields: [numberId], references: [id], onDelete: Cascade)
+  chatbots       MetaWhatsappChatbot[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId, numberId])
+}
+
+
+model MetaWhatsappAnalytics {
+  id                 String   @id @default(cuid())
+  userId             String
+  wabaId             String
+  periodStart        DateTime
+  periodEnd          DateTime
+  granularity        String   @default("DAILY")
+  type               String
+  data               Json?
+  
+  totalConversations Int      @default(0)
+  freeConversations  Int      @default(0)
+  paidConversations  Int      @default(0)
+  messageSent        Int      @default(0)
+  messageDelivered   Int      @default(0)
+
+  fetchedAt          DateTime @default(now())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, wabaId, type, periodStart, periodEnd])
+  @@index([fetchedAt])
+}
+
+model MetaWhatsappTemplateLibrary {
+  id               String   @id @default(cuid())
+  libraryId        String?  @unique
+  title            String?
+  description      String?
+  category         String
+  topic            String   @default("ECOMMERCE")
+  language         String   @default("en_US")
+  header           Json?
+  body             String
+  footer           String?  @default("")
+  buttons          Json?
+  sampleVariables  Json?
+  tags             Json?
+  isOfficial       Boolean  @default(true)
+  name             String?
+  usecase          String?
+  industry         Json?
+  body_params      Json?
+  body_param_types Json?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model WhatsAppApiKey {
+  id              String   @id @default(cuid())
+  userId          String
+  whatsappTokenId String
+  phoneNumberId   String
+  phoneNumber     String?
+  apiKey          String   @unique
+  rawKey          String?
+  displayKey      String?
+  keySuffix       String?
+  status          String   @default("active")
+  expiresAt       DateTime?
+  lastUsedAt      DateTime?
+  totalRequests   Int      @default(0)
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token           WhatsAppToken @relation(fields: [whatsappTokenId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId, status])
+  @@unique([userId, whatsappTokenId, status])
+}
+
+
+model MetaWhatsappPricing {
+  id                   String    @id @default(cuid())
+  countryCode          String
+  countryName          String
+  countryPrefix        String
+  currency             String    @default("INR")
+  marketing            Float     @default(0)
+  utility              Float     @default(0)
+  authentication       Float     @default(0)
+  service              Float     @default(0)
+  marketingMarkup      Float     @default(0.10)
+  utilityMarkup        Float     @default(0.10)
+  authenticationMarkup Float     @default(0.10)
+  serviceMarkup        Float     @default(0.10)
+  effectiveFrom        DateTime  @default(now())
+  effectiveTo          DateTime?
+  version              Int       @default(1)
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([countryPrefix, effectiveFrom(sort: Desc)])
+  @@index([countryCode, effectiveFrom(sort: Desc)])
+}
+
