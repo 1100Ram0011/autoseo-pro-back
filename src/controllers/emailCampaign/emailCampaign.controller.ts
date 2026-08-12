@@ -30,8 +30,60 @@ export const getCampaigns = async (req: Request, res: Response) => {
       prisma.emailCampaign.count({ where: { userId } }),
     ]);
 
+    // DUMMY DATA INJECTION for flow checking if DB is empty
+    if (campaigns.length === 0) {
+      const dummyCampaigns = [
+        {
+          _id: "dummy_1",
+          name: "Welcome Onboarding Campaign",
+          status: "RUNNING",
+          provider: "SendGrid",
+          senderEmail: "hello@autoseo-pro.com",
+          totalRecipients: 5000,
+          stats: { sent: 4800, delivered: 4500, read: 2000, failed: 200 },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          template: { id: "tpl_1", name: "Welcome Email", subject: "Welcome to our platform!" }
+        },
+        {
+          _id: "dummy_2",
+          name: "Black Friday Promo",
+          status: "COMPLETED",
+          provider: "AWS_SES",
+          senderEmail: "promos@autoseo-pro.com",
+          totalRecipients: 10000,
+          stats: { sent: 10000, delivered: 9800, read: 6000, failed: 200 },
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          updatedAt: new Date(Date.now() - 86400000).toISOString(),
+          template: { id: "tpl_2", name: "Promo Email", subject: "50% OFF everything!" }
+        },
+        {
+          _id: "dummy_3",
+          name: "Re-engagement Campaign",
+          status: "PAUSED",
+          provider: "SMTP",
+          senderEmail: "support@autoseo-pro.com",
+          totalRecipients: 1500,
+          stats: { sent: 500, delivered: 490, read: 100, failed: 10 },
+          createdAt: new Date(Date.now() - 172800000).toISOString(),
+          updatedAt: new Date(Date.now() - 172800000).toISOString(),
+          template: { id: "tpl_3", name: "We Miss You", subject: "We miss you!" }
+        }
+      ];
+
+      return res.json({
+        data: dummyCampaigns,
+        pagination: {
+          total: 3,
+          page: 1,
+          pages: 1,
+          limit: 20,
+        },
+      });
+    }
+
     return res.json({
-      campaigns,
+      data: campaigns,
       pagination: {
         total,
         page,
