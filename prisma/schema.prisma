@@ -52,6 +52,7 @@ model User {
   metaWhatsappChatbotFlows MetaWhatsappChatbotFlow[]
   metaWhatsappInteractives MetaWhatsappInteractive[]
   metaWhatsappAnalytics    MetaWhatsappAnalytics[]
+  businessProfiles         BusinessSummaryProfile[]
   whatsappApiKeys          WhatsAppApiKey[]
 }
 
@@ -1023,5 +1024,79 @@ model MetaWhatsappPricing {
 
   @@index([countryPrefix, effectiveFrom(sort: Desc)])
   @@index([countryCode, effectiveFrom(sort: Desc)])
+}
+
+
+
+model BusinessSummaryProfile {
+  id               String   @id @default(cuid())
+  userId           String?
+  onboardedUserId  String?
+  onboardedAt      DateTime?
+  websiteUrl       String
+  websiteHash      String
+  isActive         Boolean  @default(true)
+  analysis         Json?
+  pdfUrl           String?
+  status           String   @default("PENDING")
+  whoGenerated     String   @default("boradeai")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  User             User?    @relation(fields: [userId], references: [id])
+}
+
+model AdminOutreachProfile {
+  id                       String   @id @default(cuid())
+  adminId                  String
+  websiteUrl               String
+  businessSummaryProfileId String?
+  mediaUrls                Json?
+  analysis                 Json?
+  pdfUrl                   String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
+model FreeUsageMaster {
+  id          String   @id @default(cuid())
+  featureKey  String   @unique
+  limit       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FreeUsage {
+  id          String   @id @default(cuid())
+  userId      String
+  featureKey  String
+  used        Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, featureKey])
+}
+
+
+
+model EmailDailyUsageLog {
+  id        String   @id @default(cuid())
+  tokenId   String
+  date      DateTime @db.Date
+  sentCount Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tokenId, date])
+}
+
+model EmailRollingUsage {
+  id        String   @id @default(cuid())
+  tokenId   String
+  sentAt    DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tokenId, sentAt])
 }
 

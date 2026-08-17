@@ -218,6 +218,19 @@ export const bulkEmailQueue = new Queue("bulk-email-queue", {
   skipVersionCheck: true,
 });
 
+export const resetEmailLimitsQueue = new Queue("reset-email-limits-queue", {
+  connection,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: {
+      type: "exponential",
+      delay: 10000,
+    },
+    removeOnComplete: true,
+  },
+  skipVersionCheck: true,
+});
+
 export const whatsappCampaignQueue = new Queue("whatsapp-campaign-queue", {
   connection,
   defaultJobOptions: {
